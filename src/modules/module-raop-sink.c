@@ -1692,6 +1692,9 @@ static void stream_props_changed(struct impl *impl, uint32_t id, const struct sp
 					rtsp_send_track_info(impl);
 				}
 			}
+
+			spa_pod_builder_prop(&b, SPA_PROP_artist, 0);
+			spa_pod_builder_string(&b, "artist");
 			spa_pod_builder_raw_padded(&b, prop, SPA_POD_PROP_SIZE(prop));
 			break;
 		}
@@ -1707,6 +1710,8 @@ static void stream_props_changed(struct impl *impl, uint32_t id, const struct sp
 					rtsp_send_track_info(impl);
 				}
 			}
+			spa_pod_builder_prop(&b, SPA_PROP_album, 0);
+			spa_pod_builder_string(&b, "album");
 			spa_pod_builder_raw_padded(&b, prop, SPA_POD_PROP_SIZE(prop));
 			break;
 		}
@@ -1722,6 +1727,8 @@ static void stream_props_changed(struct impl *impl, uint32_t id, const struct sp
 					rtsp_send_track_info(impl);
 				}
 			}
+			spa_pod_builder_prop(&b, SPA_PROP_trackName, 0);
+			spa_pod_builder_string(&b, "trackName");
 			spa_pod_builder_raw_padded(&b, prop, SPA_POD_PROP_SIZE(prop));
 			break;
 		}
