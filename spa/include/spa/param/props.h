@@ -61,6 +61,9 @@ enum spa_prop {
 	SPA_PROP_frequency,
 	SPA_PROP_volume,			/**< a volume (Float), 0.0 silence, 1.0 no attenutation */
 	SPA_PROP_mute,				/**< mute (Bool) */
+	SPA_PROP_artist,
+	SPA_PROP_album,
+	SPA_PROP_trackName,
 	SPA_PROP_patternType,
 	SPA_PROP_ditherType,
 	SPA_PROP_truncate,

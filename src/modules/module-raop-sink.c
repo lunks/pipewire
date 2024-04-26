@@ -202,6 +202,12 @@ enum {
 	CODEC_AAC_ELD,
 };
 
+struct metadata {
+	char *track;
+	char *artist;
+	char *album;
+};
+
 struct impl {
 	struct pw_context *context;
 
@@ -267,6 +273,7 @@ struct impl {
 
 	bool mute;
 	float volume;
+	struct metadata *metadata;
 
 	struct spa_ringbuffer ring;
 	uint8_t buffer[BUFFER_SIZE];
@@ -853,6 +860,18 @@ static int rtsp_send_volume(struct impl *impl)
 	snprintf(header, sizeof(header), "volume: %s\r\n",
 			spa_dtoa(volstr, sizeof(volstr), impl->mute ? VOLUME_MUTE : impl->volume));
 	return rtsp_send(impl, "SET_PARAMETER", "text/parameters", header, rtsp_log_reply_status);
+}
+
+static int rtsp_send_track_info(struct impl *impl) {
+    if (!impl->recording)
+        return 0;  // Do not send if not recording
+
+    char header[1024];
+    snprintf(header, sizeof(header),
+             "dmap.itemname:%s\ndaap.songartist:%s\ndaap.songalbum:%s",
+             impl->metadata->track, impl->metadata->artist, impl->metadata->album);
+
+    return rtsp_send(impl, "SET_PARAMETER", "application/x-dmap-tagged", header, rtsp_log_reply_status);
 }
 
 static void rtsp_do_post_feedback(void *data, uint64_t expirations)
@@ -1658,6 +1677,51 @@ static void stream_props_changed(struct impl *impl, uint32_t id, const struct sp
 			spa_pod_builder_prop(&b, SPA_PROP_softVolumes, 0);
 			spa_pod_builder_array(&b, sizeof(float), SPA_TYPE_Float,
 					n_vols, soft_vols);
+			spa_pod_builder_raw_padded(&b, prop, SPA_POD_PROP_SIZE(prop));
+			break;
+		}
+		case SPA_PROP_artist:
+		{
+			const char *str;
+			if (spa_pod_get_string(&prop->value, &str) == 0) {
+				impl->metadata->artist = strdup(str);
+				pw_log_debug("Artist set to: %s", impl->metadata->artist);
+				if (impl->metadata->artist && impl->metadata->album && impl->metadata->track) {
+					pw_log_debug("All metadata available. Artist: %s, Album: %s, Track: %s",
+					impl->metadata->artist, impl->metadata->album, impl->metadata->track);
+					rtsp_send_track_info(impl);
+				}
+			}
+			spa_pod_builder_raw_padded(&b, prop, SPA_POD_PROP_SIZE(prop));
+			break;
+		}
+		case SPA_PROP_album:
+		{
+			const char *str;
+			if (spa_pod_get_string(&prop->value, &str) == 0) {
+				impl->metadata->album = strdup(str);
+				pw_log_debug("Album set to: %s", impl->metadata->album);
+				if (impl->metadata->artist && impl->metadata->album && impl->metadata->track) {
+					pw_log_debug("All metadata available. Artist: %s, Album: %s, Track: %s",
+					impl->metadata->artist, impl->metadata->album, impl->metadata->track);
+					rtsp_send_track_info(impl);
+				}
+			}
+			spa_pod_builder_raw_padded(&b, prop, SPA_POD_PROP_SIZE(prop));
+			break;
+		}
+		case SPA_PROP_trackName:
+		{
+			const char *str;
+			if (spa_pod_get_string(&prop->value, &str) == 0) {
+				impl->metadata->track = strdup(str);
+				pw_log_debug("Track set to: %s", impl->metadata->track);
+				if (impl->metadata->artist && impl->metadata->album && impl->metadata->track) {
+					pw_log_debug("All metadata available. Artist: %s, Album: %s, Track: %s",
+					impl->metadata->artist, impl->metadata->album, impl->metadata->track);
+					rtsp_send_track_info(impl);
+				}
+			}
 			spa_pod_builder_raw_padded(&b, prop, SPA_POD_PROP_SIZE(prop));
 			break;
 		}
