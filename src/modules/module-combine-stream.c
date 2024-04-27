@@ -622,52 +622,11 @@ static int do_add_stream(struct spa_loop *loop, bool async, uint32_t seq,
 	return 0;
 }
 
-static void print_pod(const struct spa_pod *param) {
-	bool is_struct = spa_pod_is_struct(param);
-	if(is_struct) {
-		puts("STRUCT");
-		pw_log_warn("is struct pod %i, podtype %i, podsize %i\n", is_struct, param->type, param->size);
-		// we can cast it, we know its type
-		struct spa_pod_struct *example_struct = (struct spa_pod_struct*)param;
-		struct spa_pod *entry;
-		SPA_POD_STRUCT_FOREACH(example_struct, entry) {
-			pw_log_warn("field type:%d\n", entry->type);
-			// two ways to get the value, casting or using spa_pod_get_..
-			if (spa_pod_is_int(entry)) {
-				int32_t ival;
-				spa_pod_get_int(entry, &ival);
-				pw_log_warn("found int, pod_int: %d\n", ival);
-			}
-			if (spa_pod_is_float(entry)) {
-				struct spa_pod_float *pod_float = (struct spa_pod_float*)entry;
-				pw_log_warn("found float, pod_float: %f\n", pod_float->value);
-			}
-		}
-
-		puts("END STRUCT");
-	}
-
-	bool is_obj_pod = spa_pod_is_object(param);
-
-	if(is_obj_pod) {
-		puts("OBJ");
-	pw_log_warn("is object pod %i, podtype %i\n", is_obj_pod, param->type);
-	// same idea, also cast it
-	struct spa_pod_object *obj = (struct spa_pod_object*)param;
-	const struct spa_pod_prop *prop;
-	SPA_POD_OBJECT_FOREACH(obj, prop) {
-		pw_log_warn("prop key:%d\n", prop->key);
-		pw_log_warn("prop value type:%d\n", prop->value.type);
-	}
-	puts("END OBJ");
-
-	}
-}
-
 static void update_tags(struct impl *impl, const struct spa_pod *param)
 {
-	print_pod(param);
+
 	struct stream *s;
+
 	spa_list_for_each(s, &impl->streams, link) {
 		if (s->stream == NULL)
 			continue;
@@ -797,7 +756,6 @@ static void stream_param_changed(void *d, uint32_t id, const struct spa_pod *par
 		update_delay(s->impl);
 		break;
 	case SPA_PARAM_Tag:
-		print_pod(param);
 		if (param != NULL) {
 			update_tags(s->impl, param);
 		}
