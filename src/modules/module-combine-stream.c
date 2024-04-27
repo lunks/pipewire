@@ -31,6 +31,7 @@
 #include <pipewire/impl.h>
 #include <pipewire/i18n.h>
 
+
 /** \page page_module_combine_stream Combine Stream
  *
  * The combine stream can make:
@@ -623,6 +624,8 @@ static int do_add_stream(struct spa_loop *loop, bool async, uint32_t seq,
 static void update_tags(struct impl *impl, const struct spa_pod *param)
 {
 	struct stream *s;
+	puts("EITA PORRA");
+	spa_debug_pod(2, NULL, param);
 
 	spa_list_for_each(s, &impl->streams, link) {
 		if (s->stream == NULL)
@@ -631,12 +634,6 @@ static void update_tags(struct impl *impl, const struct spa_pod *param)
 		struct spa_dict_item items[64];
 		uint32_t i, n_items = 0;
 
-		/* SPA_POD_OBJECT_FOREACH(obj, prop) { */
-		/* 	if (n_items < SPA_N_ELEMENTS(items)) { */
-		/* 		items[n_items] = *prop; */
-		/* 		n_items++; */
-		/* 	} */
-		/* } */
 		for (i = 0; i < impl->stream_props->dict.n_items; i++) {
 			if (n_items < SPA_N_ELEMENTS(items) &&
 			    spa_strstartswith(impl->stream_props->dict.items[i].key, "media."))
@@ -759,7 +756,9 @@ static void stream_param_changed(void *d, uint32_t id, const struct spa_pod *par
 		update_delay(s->impl);
 		break;
 	case SPA_PARAM_Tag:
-		update_tags(s->impl, param);
+		if (param == NULL) {
+			update_tags(s->impl, param);
+		}
 		break;
 	default:
 		break;
