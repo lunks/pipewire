@@ -16,6 +16,7 @@
 
 #include "config.h"
 
+#define spa_debug(fmt,...) printf(fmt"\n", ## __VA_ARGS__)
 
 #include <spa/utils/result.h>
 #include <spa/utils/string.h>
@@ -23,7 +24,9 @@
 #include <spa/utils/ringbuffer.h>
 #include <spa/debug/types.h>
 #include <spa/debug/log.h>
+#include <spa/pod/pod.h>
 #include <spa/pod/builder.h>
+#include <spa/debug/pod.h>
 #include <spa/param/audio/format-utils.h>
 #include <spa/param/audio/raw.h>
 #include <spa/param/latency-utils.h>
@@ -622,9 +625,49 @@ static int do_add_stream(struct spa_loop *loop, bool async, uint32_t seq,
 	return 0;
 }
 
-static void update_tags(struct impl *impl, const struct spa_pod *param)
+static void update_tags(struct impl *impl, const struct spa_pod *pod)
 {
-
+	switch (SPA_POD_TYPE(pod)) {
+		case SPA_TYPE_Object:
+		{
+		const struct spa_pod_object *obj = (const struct spa_pod_object *)pod;
+		// Process object, e.g., access properties
+		spa_debug_pod(0, NULL, pod);
+		break;
+		}
+		case SPA_TYPE_Struct:
+		{
+		const struct spa_pod_struct *str = (const struct spa_pod_struct *)pod;
+		// Process struct, e.g., iterate over elements
+		spa_debug_pod(0, NULL, pod);
+		break;
+		}
+		case SPA_TYPE_Array:
+		{
+		const struct spa_pod_array *arr = (const struct spa_pod_array *)pod;
+		// Process array, e.g., iterate over elements
+		spa_debug_pod(0, NULL, pod);
+		break;
+		}
+		case SPA_TYPE_Bool:
+		case SPA_TYPE_Id:
+		case SPA_TYPE_Int:
+		case SPA_TYPE_Long:
+		case SPA_TYPE_Float:
+		case SPA_TYPE_Double:
+		case SPA_TYPE_String:
+		case SPA_TYPE_Bytes:
+		case SPA_TYPE_Rectangle:
+		case SPA_TYPE_Fraction:
+		{
+		// Simple types can be directly read
+		spa_debug_pod(0, NULL, pod);
+		break;
+		}
+		default:
+		fprintf(stderr, "Unsupported SPA pod type\n");
+		break;
+	}
 	struct stream *s;
 
 	spa_list_for_each(s, &impl->streams, link) {
@@ -652,6 +695,37 @@ static void update_tags(struct impl *impl, const struct spa_pod *param)
 		}
 	}
 }
+
+/* static void update_tags(struct impl *impl, const struct spa_pod *param) */
+/* { */
+/*  */
+/* 	struct stream *s; */
+/*  */
+/* 	spa_list_for_each(s, &impl->streams, link) { */
+/* 		if (s->stream == NULL) */
+/* 			continue; */
+/*  */
+/* 		struct spa_dict_item items[64]; */
+/* 		uint32_t i, n_items = 0; */
+/*  */
+/* 		for (i = 0; i < impl->stream_props->dict.n_items; i++) { */
+/* 			if (n_items < SPA_N_ELEMENTS(items) && */
+/* 			    spa_strstartswith(impl->stream_props->dict.items[i].key, "media.")) */
+/* 				items[n_items++] = impl->stream_props->dict.items[i]; */
+/* 		} */
+/* 		if (n_items > 0) { */
+/* 			const struct spa_pod *p; */
+/* 			uint8_t buffer[1024]; */
+/* 			struct spa_pod_builder b; */
+/* 			struct spa_pod_frame f; */
+/* 			spa_pod_builder_init(&b, buffer, sizeof(buffer)); */
+/* 			spa_tag_build_start(&b, &f, SPA_PARAM_Tag, get_combine_direction(impl)); */
+/* 			spa_tag_build_add_dict(&b, &SPA_DICT_INIT(items, n_items)); */
+/* 			p = spa_tag_build_end(&b, &f); */
+/* 			pw_stream_update_params(s->stream, &p, 1); */
+/* 		} */
+/* 	} */
+/* } */
 
 static int do_remove_stream(struct spa_loop *loop, bool async, uint32_t seq,
                 const void *data, size_t size, void *user_data)
