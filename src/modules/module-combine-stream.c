@@ -651,6 +651,7 @@ static void check_stream_props(struct impl *impl) {
 
 static void check_pod(const struct spa_pod *pod) {
 	if (pod == NULL) {
+		pw_log_debug("null");
 		return;
 	}
 
@@ -695,14 +696,10 @@ static void check_pod(const struct spa_pod *pod) {
 
 static void process_spa_pod_object(const struct spa_pod_object *obj) {
     const struct spa_pod_prop *prop;
-    uint32_t key;
-    struct spa_pod *value;
 
-    // Initialize the iterator state
     SPA_POD_OBJECT_FOREACH(obj, prop) {
-        key = prop->key;
-        pw_log_debug("Key: %u\n", key);
-	check_pod(value);
+        pw_log_debug("Key: %u\n", prop->key);
+	check_pod(&prop->value);
     }
 }
 
