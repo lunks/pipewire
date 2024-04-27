@@ -620,33 +620,33 @@ static int do_add_stream(struct spa_loop *loop, bool async, uint32_t seq,
 	return 0;
 }
 
-static void update_tags(struct impl *impl)
+static void update_tags(struct impl *impl, const struct spa_pod *param)
 {
 	struct stream *s;
 
 	spa_list_for_each(s, &impl->streams, link) {
 		if (s->stream == NULL)
 			continue;
-
-		struct spa_dict_item items[64];
-		uint32_t i, n_items = 0;
-
-		for (i = 0; i < impl->props->dict.n_items; i++) {
-			if (n_items < SPA_N_ELEMENTS(items) &&
-			    spa_strstartswith(impl->props->dict.items[i].key, "media."))
-				items[n_items++] = impl->props->dict.items[i];
-		}
-		if (n_items > 0) {
-			const struct spa_pod *p;
-			uint8_t buffer[1024];
-			struct spa_pod_builder b;
-			struct spa_pod_frame f;
-			spa_pod_builder_init(&b, buffer, sizeof(buffer));
-			spa_tag_build_start(&b, &f, SPA_PARAM_Tag, get_combine_direction(s->impl));
-			spa_tag_build_add_dict(&b, &SPA_DICT_INIT(items, n_items));
-			p = spa_tag_build_end(&b, &f);
-			pw_stream_update_params(s->stream, &p, 1);
-		}
+		/*  */
+		/* struct spa_dict_item items[64]; */
+		/* uint32_t i, n_items = 0; */
+		/*  */
+		/* for (i = 0; i < impl->combine->props->dict.n_items; i++) { */
+		/* 	if (n_items < SPA_N_ELEMENTS(items) && */
+		/* 	    spa_strstartswith(impl->combine->props->dict.items[i].key, "media.")) */
+		/* 		items[n_items++] = impl->combine->props->dict.items[i]; */
+		/* } */
+		/* if (n_items > 0) { */
+			/* const struct spa_pod *p; */
+			/* uint8_t buffer[1024]; */
+			/* struct spa_pod_builder b; */
+			/* struct spa_pod_frame f; */
+			/* spa_pod_builder_init(&b, buffer, sizeof(buffer)); */
+			/* spa_tag_build_start(&b, &f, SPA_PARAM_Tag, get_combine_direction(s->impl)); */
+			/* spa_tag_build_add_dict(&b, &SPA_DICT_INIT(items, n_items)); */
+			/* p = spa_tag_build_end(&b, &f); */
+			pw_stream_update_params(s->stream, &param, 1);
+		/* } */
 	}
 }
 
@@ -753,7 +753,7 @@ static void stream_param_changed(void *d, uint32_t id, const struct spa_pod *par
 		update_delay(s->impl);
 		break;
 	case SPA_PARAM_Tag:
-		update_tags(s->impl);
+		update_tags(s->impl, param);
 		break;
 	default:
 		break;
