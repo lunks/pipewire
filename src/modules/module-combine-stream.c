@@ -17,8 +17,6 @@
 #include "config.h"
 
 
-#define spa_debug(fmt,...) printf(fmt"\n", ## __VA_ARGS__)
-
 #include <spa/utils/result.h>
 #include <spa/utils/string.h>
 #include <spa/utils/json.h>
@@ -627,8 +625,6 @@ static int do_add_stream(struct spa_loop *loop, bool async, uint32_t seq,
 static void update_tags(struct impl *impl, const struct spa_pod *param)
 {
 	struct stream *s;
-	puts("EITA PORRA");
-	spa_debug_pod(2, NULL, param);
 
 	spa_list_for_each(s, &impl->streams, link) {
 		if (s->stream == NULL)
@@ -759,7 +755,7 @@ static void stream_param_changed(void *d, uint32_t id, const struct spa_pod *par
 		update_delay(s->impl);
 		break;
 	case SPA_PARAM_Tag:
-		if (param == NULL) {
+		if (param != NULL) {
 			update_tags(s->impl, param);
 		}
 		break;
