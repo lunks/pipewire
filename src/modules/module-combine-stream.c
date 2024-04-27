@@ -20,7 +20,6 @@
 #include <spa/utils/string.h>
 #include <spa/utils/json.h>
 #include <spa/utils/ringbuffer.h>
-#include <spa/debug/pod.h>
 #include <spa/debug/types.h>
 #include <spa/debug/log.h>
 #include <spa/pod/builder.h>
@@ -624,7 +623,6 @@ static int do_add_stream(struct spa_loop *loop, bool async, uint32_t seq,
 static void update_tags(struct impl *impl, const struct spa_pod *param)
 {
 	struct stream *s;
-	pw_log_pod(SPA_LOG_LEVEL_INFO, param);
 
 	spa_list_for_each(s, &impl->streams, link) {
 		if (s->stream == NULL)
