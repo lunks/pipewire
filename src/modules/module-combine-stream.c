@@ -633,6 +633,7 @@ static void update_tags(struct impl *impl, const struct spa_pod *pod)
 		const struct spa_pod_object *obj = (const struct spa_pod_object *)pod;
 		// Process object, e.g., access properties
 		spa_debug_pod(0, NULL, pod);
+		pw_log_info("its a object");
 		break;
 		}
 		case SPA_TYPE_Struct:
@@ -640,6 +641,7 @@ static void update_tags(struct impl *impl, const struct spa_pod *pod)
 		const struct spa_pod_struct *str = (const struct spa_pod_struct *)pod;
 		// Process struct, e.g., iterate over elements
 		spa_debug_pod(0, NULL, pod);
+		pw_log_info("its a struct");
 		break;
 		}
 		case SPA_TYPE_Array:
@@ -647,6 +649,7 @@ static void update_tags(struct impl *impl, const struct spa_pod *pod)
 		const struct spa_pod_array *arr = (const struct spa_pod_array *)pod;
 		// Process array, e.g., iterate over elements
 		spa_debug_pod(0, NULL, pod);
+		pw_log_info("its a array");
 		break;
 		}
 		case SPA_TYPE_Bool:
@@ -662,6 +665,7 @@ static void update_tags(struct impl *impl, const struct spa_pod *pod)
 		{
 		// Simple types can be directly read
 		spa_debug_pod(0, NULL, pod);
+		pw_log_info("something else");
 		break;
 		}
 		default:
