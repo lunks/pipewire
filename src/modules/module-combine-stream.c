@@ -741,8 +741,9 @@ static void process_spa_pod_object(const struct spa_pod_object *obj) {
 	const struct spa_pod_prop *prop;
 
 	SPA_POD_OBJECT_FOREACH(obj, prop) {
+		pw_log_debug("key: %d", prop->key);
 		if (prop->key == 1) {
-			pw_log_debug("Value: %u\n", prop->value);
+			check_pod(&prop->value);
 		}
 		if (prop->key == 2) {
 			log_spa_pod_struct((const struct spa_pod_struct *)&prop->value);
