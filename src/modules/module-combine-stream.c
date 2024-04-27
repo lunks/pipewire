@@ -702,6 +702,7 @@ static void process_spa_pod_object(const struct spa_pod_object *obj) {
     SPA_POD_OBJECT_FOREACH(obj, prop) {
         key = prop->key;
         pw_log_debug("Key: %u\n", key);
+	check_pod(value);
     }
 }
 
