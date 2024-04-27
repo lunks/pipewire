@@ -677,36 +677,44 @@ static void check_pod(const struct spa_pod *pod) {
 		case SPA_TYPE_Bool:
 			{
 				pw_log_debug("Boolean");
+				pw_log_debug("Value: %d", SPA_POD_VALUE(struct spa_pod_bool, pod));
 				break;
 			}
 		case SPA_TYPE_Id:
 			{
 				pw_log_debug("ID");
+				pw_log_debug("Value: %d", SPA_POD_VALUE(struct spa_pod_id, pod));
 				break;
 			}
 		case SPA_TYPE_Int:
 			{
 				pw_log_debug("Integer");
+				pw_log_debug("Value: %d", SPA_POD_VALUE(struct spa_pod_int, pod));
 				break;
 			}
 		case SPA_TYPE_Long:
 			{
 				pw_log_debug("Long");
+				pw_log_debug("Value: %ld", SPA_POD_VALUE(struct spa_pod_long, pod));
 				break;
 			}
 		case SPA_TYPE_Float:
 			{
 				pw_log_debug("Float");
+				pw_log_debug("Value: %f", SPA_POD_VALUE(struct spa_pod_float, pod));
 				break;
 			}
 		case SPA_TYPE_Double:
 			{
 				pw_log_debug("Double");
+				pw_log_debug("Value: %f", SPA_POD_VALUE(struct spa_pod_double, pod));
 				break;
 			}
 		case SPA_TYPE_String:
 			{
 				pw_log_debug("String");
+				const char *s = (const char *)SPA_POD_CONTENTS(struct spa_pod_string, pod);
+				pw_log_debug("Value: %s", s);
 				break;
 			}
 		case SPA_TYPE_Bytes:
