@@ -690,17 +690,30 @@ static void check_pod(const struct spa_pod *pod) {
 			}
 		default:
 			pw_log_debug("Unsupported SPA pod type");
-			break;
+		break;
+	}
+}
+
+static void log_spa_pod_struct(const struct spa_pod_struct *pod_struct) {
+	struct spa_pod *pod, *obj;
+	SPA_POD_STRUCT_FOREACH(obj, pod) {
+		pw_log_debug("field type:%d\n", pod->type);
+		pw_log_debug("field size:%d\n", pod->size);
+		check_pod(pod);
 	}
 }
 
 static void process_spa_pod_object(const struct spa_pod_object *obj) {
-    const struct spa_pod_prop *prop;
+	const struct spa_pod_prop *prop;
 
-    SPA_POD_OBJECT_FOREACH(obj, prop) {
-        pw_log_debug("Key: %u\n", prop->key);
-	check_pod(&prop->value);
-    }
+	SPA_POD_OBJECT_FOREACH(obj, prop) {
+		if (prop->key == 1) {
+			pw_log_debug("Value: %u\n", prop->value);
+		}
+		if (prop->key == 2) {
+			log_spa_pod_struct((const struct spa_pod_struct *)&prop->value);
+		}
+	}
 }
 
 static void update_tags(struct impl *impl, const struct spa_pod *param)
