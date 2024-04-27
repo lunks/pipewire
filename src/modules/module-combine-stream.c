@@ -770,6 +770,7 @@ static void param_tag_changed(struct impl *impl, const struct spa_pod *param)
 	spa_list_for_each(s, &impl->streams, link) {
 		if (s->stream == NULL)
 			continue;
+		pw_log_debug("updating stream %d", s->id);
 		pw_stream_update_params(s->stream, params, 1);
 
 	}
