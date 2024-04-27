@@ -651,9 +651,12 @@ static void check_stream_props(struct impl *impl) {
 
 static void update_tags(struct impl *impl)
 {
-	check_props(impl);
-	check_stream_props(impl);
-	check_combine_props(impl);
+	if (impl->props)
+		check_props(impl);
+	if (impl->stream_props)
+		check_stream_props(impl);
+	if (impl->combine_props)
+		check_combine_props(impl);
 }
 
 /* static void update_tags(struct impl *impl, const struct spa_pod *param) */
