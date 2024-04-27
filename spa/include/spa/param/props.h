@@ -114,9 +114,6 @@ enum spa_prop {
 
 
 	SPA_PROP_START_CUSTOM	= 0x1000000,
-	SPA_PROP_artist,
-	SPA_PROP_album,
-	SPA_PROP_trackName,
 };
 
 /**
