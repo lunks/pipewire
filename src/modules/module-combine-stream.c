@@ -834,6 +834,8 @@ static void stream_param_changed(void *d, uint32_t id, const struct spa_pod *par
 		update_delay(s->impl);
 		break;
 	case SPA_PARAM_Tag:
+	        if (param == NULL)
+				pw_log_info("param is NULL");
 		update_tags(s->impl, param);
 		break;
 	default:
