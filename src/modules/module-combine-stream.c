@@ -624,7 +624,7 @@ static int do_add_stream(struct spa_loop *loop, bool async, uint32_t seq,
 static void update_tags(struct impl *impl, const struct spa_pod *param)
 {
 	struct stream *s;
-	spa_debug_pod(0, NULL, param);
+	pw_log_pod(SPA_LOG_LEVEL_INFO, param);
 
 	spa_list_for_each(s, &impl->streams, link) {
 		if (s->stream == NULL)
