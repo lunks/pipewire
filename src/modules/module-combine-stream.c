@@ -675,17 +675,53 @@ static void check_pod(const struct spa_pod *pod) {
 				break;
 			}
 		case SPA_TYPE_Bool:
+			{
+				pw_log_debug("Boolean");
+				break;
+			}
 		case SPA_TYPE_Id:
+			{
+				pw_log_debug("ID");
+				break;
+			}
 		case SPA_TYPE_Int:
+			{
+				pw_log_debug("Integer");
+				break;
+			}
 		case SPA_TYPE_Long:
+			{
+				pw_log_debug("Long");
+				break;
+			}
 		case SPA_TYPE_Float:
+			{
+				pw_log_debug("Float");
+				break;
+			}
 		case SPA_TYPE_Double:
+			{
+				pw_log_debug("Double");
+				break;
+			}
 		case SPA_TYPE_String:
+			{
+				pw_log_debug("String");
+				break;
+			}
 		case SPA_TYPE_Bytes:
+			{
+				pw_log_debug("Bytes");
+				break;
+			}
 		case SPA_TYPE_Rectangle:
+			{
+				pw_log_debug("Rectangle");
+				break;
+			}
 		case SPA_TYPE_Fraction:
 			{
-				pw_log_debug("Something");
+				pw_log_debug("Fraction");
 				break;
 			}
 		default:
@@ -697,8 +733,6 @@ static void check_pod(const struct spa_pod *pod) {
 static void log_spa_pod_struct(const struct spa_pod_struct *pod_struct) {
 	struct spa_pod *pod, *obj;
 	SPA_POD_STRUCT_FOREACH(obj, pod) {
-		pw_log_debug("field type:%d\n", pod->type);
-		pw_log_debug("field size:%d\n", pod->size);
 		check_pod(pod);
 	}
 }
