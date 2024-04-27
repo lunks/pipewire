@@ -627,6 +627,7 @@ static int do_add_stream(struct spa_loop *loop, bool async, uint32_t seq,
 
 static void update_tags(struct impl *impl)
 {
+	pw_log_info("updating tags");
 	struct stream *s;
 
 	spa_list_for_each(s, &impl->streams, link) {
@@ -1330,7 +1331,7 @@ static void combine_param_changed(void *d, uint32_t id, const struct spa_pod *pa
 		break;
 	}
 	case SPA_PARAM_Tag:
-			if (!param) {
+			if (param == NULL) {
 				pw_log_info("param is null");
 			} else {
 				pw_log_info("param is not null");
