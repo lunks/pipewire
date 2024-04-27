@@ -20,6 +20,7 @@
 #include <spa/utils/string.h>
 #include <spa/utils/json.h>
 #include <spa/utils/ringbuffer.h>
+#include <spa/debug/pod.h>
 #include <spa/debug/types.h>
 #include <spa/debug/log.h>
 #include <spa/pod/builder.h>
@@ -623,30 +624,37 @@ static int do_add_stream(struct spa_loop *loop, bool async, uint32_t seq,
 static void update_tags(struct impl *impl, const struct spa_pod *param)
 {
 	struct stream *s;
+	spa_debug_pod(0, NULL, param);
 
 	spa_list_for_each(s, &impl->streams, link) {
 		if (s->stream == NULL)
 			continue;
-		/*  */
-		/* struct spa_dict_item items[64]; */
-		/* uint32_t i, n_items = 0; */
-		/*  */
-		/* for (i = 0; i < impl->combine->props->dict.n_items; i++) { */
-		/* 	if (n_items < SPA_N_ELEMENTS(items) && */
-		/* 	    spa_strstartswith(impl->combine->props->dict.items[i].key, "media.")) */
-		/* 		items[n_items++] = impl->combine->props->dict.items[i]; */
+
+		struct spa_dict_item items[64];
+		uint32_t i, n_items = 0;
+
+		/* SPA_POD_OBJECT_FOREACH(obj, prop) { */
+		/* 	if (n_items < SPA_N_ELEMENTS(items)) { */
+		/* 		items[n_items] = *prop; */
+		/* 		n_items++; */
+		/* 	} */
 		/* } */
-		/* if (n_items > 0) { */
-			/* const struct spa_pod *p; */
-			/* uint8_t buffer[1024]; */
-			/* struct spa_pod_builder b; */
-			/* struct spa_pod_frame f; */
-			/* spa_pod_builder_init(&b, buffer, sizeof(buffer)); */
-			/* spa_tag_build_start(&b, &f, SPA_PARAM_Tag, get_combine_direction(s->impl)); */
-			/* spa_tag_build_add_dict(&b, &SPA_DICT_INIT(items, n_items)); */
-			/* p = spa_tag_build_end(&b, &f); */
-			pw_stream_update_params(s->stream, &param, 1);
-		/* } */
+		for (i = 0; i < impl->stream_props->dict.n_items; i++) {
+			if (n_items < SPA_N_ELEMENTS(items) &&
+			    spa_strstartswith(impl->stream_props->dict.items[i].key, "media."))
+				items[n_items++] = impl->stream_props->dict.items[i];
+		}
+		if (n_items > 0) {
+			const struct spa_pod *p;
+			uint8_t buffer[1024];
+			struct spa_pod_builder b;
+			struct spa_pod_frame f;
+			spa_pod_builder_init(&b, buffer, sizeof(buffer));
+			spa_tag_build_start(&b, &f, SPA_PARAM_Tag, get_combine_direction(impl));
+			spa_tag_build_add_dict(&b, &SPA_DICT_INIT(items, n_items));
+			p = spa_tag_build_end(&b, &f);
+			pw_stream_update_params(s->stream, &p, 1);
+		}
 	}
 }
 

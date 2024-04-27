@@ -1680,58 +1680,6 @@ static void stream_props_changed(struct impl *impl, uint32_t id, const struct sp
 			spa_pod_builder_raw_padded(&b, prop, SPA_POD_PROP_SIZE(prop));
 			break;
 		}
-		case SPA_PROP_artist:
-		{
-			const char *str;
-			if (spa_pod_get_string(&prop->value, &str) == 0) {
-				impl->metadata->artist = strdup(str);
-				pw_log_debug("Artist set to: %s", impl->metadata->artist);
-				if (impl->metadata->artist && impl->metadata->album && impl->metadata->track) {
-					pw_log_debug("All metadata available. Artist: %s, Album: %s, Track: %s",
-					impl->metadata->artist, impl->metadata->album, impl->metadata->track);
-					rtsp_send_track_info(impl);
-				}
-			}
-
-			spa_pod_builder_prop(&b, SPA_PROP_artist, 0);
-			spa_pod_builder_string(&b, "artist");
-			spa_pod_builder_raw_padded(&b, prop, SPA_POD_PROP_SIZE(prop));
-			break;
-		}
-		case SPA_PROP_album:
-		{
-			const char *str;
-			if (spa_pod_get_string(&prop->value, &str) == 0) {
-				impl->metadata->album = strdup(str);
-				pw_log_debug("Album set to: %s", impl->metadata->album);
-				if (impl->metadata->artist && impl->metadata->album && impl->metadata->track) {
-					pw_log_debug("All metadata available. Artist: %s, Album: %s, Track: %s",
-					impl->metadata->artist, impl->metadata->album, impl->metadata->track);
-					rtsp_send_track_info(impl);
-				}
-			}
-			spa_pod_builder_prop(&b, SPA_PROP_album, 0);
-			spa_pod_builder_string(&b, "album");
-			spa_pod_builder_raw_padded(&b, prop, SPA_POD_PROP_SIZE(prop));
-			break;
-		}
-		case SPA_PROP_trackName:
-		{
-			const char *str;
-			if (spa_pod_get_string(&prop->value, &str) == 0) {
-				impl->metadata->track = strdup(str);
-				pw_log_debug("Track set to: %s", impl->metadata->track);
-				if (impl->metadata->artist && impl->metadata->album && impl->metadata->track) {
-					pw_log_debug("All metadata available. Artist: %s, Album: %s, Track: %s",
-					impl->metadata->artist, impl->metadata->album, impl->metadata->track);
-					rtsp_send_track_info(impl);
-				}
-			}
-			spa_pod_builder_prop(&b, SPA_PROP_trackName, 0);
-			spa_pod_builder_string(&b, "trackName");
-			spa_pod_builder_raw_padded(&b, prop, SPA_POD_PROP_SIZE(prop));
-			break;
-		}
 		case SPA_PROP_softVolumes:
 		case SPA_PROP_softMute:
 			break;
