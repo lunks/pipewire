@@ -701,11 +701,7 @@ static void process_spa_pod_object(const struct spa_pod_object *obj) {
     // Initialize the iterator state
     SPA_POD_OBJECT_FOREACH(obj, prop) {
         key = prop->key;
-        value = &prop->value;
-
-        // Process the key and value here
-        printf("Key: %u\n", key);
-        spa_debug_pod(0, NULL, value);
+        pw_log_debug("Key: %u\n", key);
     }
 }
 
