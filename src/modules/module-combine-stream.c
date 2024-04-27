@@ -649,6 +649,50 @@ static void check_stream_props(struct impl *impl) {
 	}
 }
 
+static void check_pod(const struct spa_pod *pod) {
+	if (pod == NULL) {
+		return;
+	}
+
+	switch (SPA_POD_TYPE(pod)) {
+		case SPA_TYPE_Object:
+			{
+				const struct spa_pod_object *obj = (const struct spa_pod_object *)pod;
+				pw_log_debug("Object");
+				break;
+			}
+		case SPA_TYPE_Struct:
+			{
+				const struct spa_pod_struct *str = (const struct spa_pod_struct *)pod;
+				pw_log_debug("Struct");
+				break;
+			}
+		case SPA_TYPE_Array:
+			{
+				const struct spa_pod_array *arr = (const struct spa_pod_array *)pod;
+				pw_log_debug("Array");
+				break;
+			}
+		case SPA_TYPE_Bool:
+		case SPA_TYPE_Id:
+		case SPA_TYPE_Int:
+		case SPA_TYPE_Long:
+		case SPA_TYPE_Float:
+		case SPA_TYPE_Double:
+		case SPA_TYPE_String:
+		case SPA_TYPE_Bytes:
+		case SPA_TYPE_Rectangle:
+		case SPA_TYPE_Fraction:
+			{
+				pw_log_debug("Something");
+				break;
+			}
+		default:
+			pw_log_debug("Unsupported SPA pod type");
+			break;
+	}
+}
+
 static void update_tags(struct impl *impl)
 {
 	if (impl->props)
@@ -1341,6 +1385,7 @@ static void combine_param_changed(void *d, uint32_t id, const struct spa_pod *pa
 			if (param == NULL) {
 				pw_log_info("param is null");
 			} else {
+				check_pod(param);
 				pw_log_info("param is not null");
 			}
 		update_tags(impl);
