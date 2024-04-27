@@ -759,35 +759,23 @@ static void process_spa_pod_object(const struct spa_pod_object *obj) {
 	}
 }
 
-static void update_tags(struct impl *impl, const struct spa_pod *param)
+static void param_tag_changed(struct impl *impl, const struct spa_pod *param)
 {
-	const struct spa_pod_object *obj = (const struct spa_pod_object *)param;
-	process_spa_pod_object(obj);
-	struct stream *s;
+	if (param == NULL)
+		return;
 
+	struct stream *s;
+	struct spa_tag_info tag;
+	const struct spa_pod *params[1] = { param };
+	void *state = NULL;
+
+	if (param == 0 || spa_tag_parse(param, &tag, &state) < 0)
+		return;
 	spa_list_for_each(s, &impl->streams, link) {
 		if (s->stream == NULL)
 			continue;
+		pw_stream_update_params(s->stream, params, 1);
 
-		struct spa_dict_item items[64];
-		uint32_t i, n_items = 0;
-
-		for (i = 0; i < impl->stream_props->dict.n_items; i++) {
-			if (n_items < SPA_N_ELEMENTS(items) &&
-			    spa_strstartswith(impl->stream_props->dict.items[i].key, "media."))
-				items[n_items++] = impl->stream_props->dict.items[i];
-		}
-		if (n_items > 0) {
-			const struct spa_pod *p;
-			uint8_t buffer[1024];
-			struct spa_pod_builder b;
-			struct spa_pod_frame f;
-			spa_pod_builder_init(&b, buffer, sizeof(buffer));
-			spa_tag_build_start(&b, &f, SPA_PARAM_Tag, get_combine_direction(impl));
-			spa_tag_build_add_dict(&b, &SPA_DICT_INIT(items, n_items));
-			p = spa_tag_build_end(&b, &f);
-			pw_stream_update_params(s->stream, &p, 1);
-		}
 	}
 }
 
@@ -1435,15 +1423,10 @@ static void combine_param_changed(void *d, uint32_t id, const struct spa_pod *pa
 		update_latency(impl);
 		break;
 	}
-	case SPA_PARAM_Tag:
-			if (param == NULL) {
-				pw_log_info("param is null");
-			} else {
-				check_pod(param);
-				pw_log_info("param is not null");
-				update_tags(impl, param);
-			}
+	case SPA_PARAM_Tag: {
+		param_tag_changed(impl, param);
 		break;
+	}
 	default:
 		break;
 	}
