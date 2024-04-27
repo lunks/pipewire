@@ -658,20 +658,20 @@ static void check_pod(const struct spa_pod *pod) {
 	switch (SPA_POD_TYPE(pod)) {
 		case SPA_TYPE_Object:
 			{
-				const struct spa_pod_object *obj = (const struct spa_pod_object *)pod;
 				pw_log_debug("Object");
+				const struct spa_pod_object *obj = (const struct spa_pod_object *)pod;
 				break;
 			}
 		case SPA_TYPE_Struct:
 			{
-				const struct spa_pod_struct *str = (const struct spa_pod_struct *)pod;
 				pw_log_debug("Struct");
+				const struct spa_pod_struct *str = (const struct spa_pod_struct *)pod;
 				break;
 			}
 		case SPA_TYPE_Array:
 			{
-				const struct spa_pod_array *arr = (const struct spa_pod_array *)pod;
 				pw_log_debug("Array");
+				const struct spa_pod_array *arr = (const struct spa_pod_array *)pod;
 				break;
 			}
 		case SPA_TYPE_Bool:
@@ -738,10 +738,10 @@ static void check_pod(const struct spa_pod *pod) {
 	}
 }
 
-static void log_spa_pod_struct(const struct spa_pod_struct *pod_struct) {
-	struct spa_pod *pod, *obj;
-	SPA_POD_STRUCT_FOREACH(obj, pod) {
-		check_pod(pod);
+static void log_spa_pod_struct(const struct spa_pod_struct *pod) {
+	struct spa_pod *prop;
+	SPA_POD_STRUCT_FOREACH(pod, prop) {
+		check_pod(prop);
 	}
 }
 
