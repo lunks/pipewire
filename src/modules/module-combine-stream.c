@@ -16,6 +16,9 @@
 
 #include "config.h"
 
+
+#define spa_debug(fmt,...) printf(fmt"\n", ## __VA_ARGS__)
+
 #include <spa/utils/result.h>
 #include <spa/utils/string.h>
 #include <spa/utils/json.h>
