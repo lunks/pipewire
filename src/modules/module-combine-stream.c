@@ -863,7 +863,7 @@ static int create_stream(struct stream_info *info)
 	struct impl *impl = info->impl;
 	int res;
 	uint32_t n_params, i, j;
-	const struct spa_pod *params[1];
+	const struct spa_pod *params[2];
 	const char *str, *node_name;
 	uint8_t buffer[1024];
 	struct spa_pod_builder b;
@@ -973,6 +973,21 @@ static int create_stream(struct stream_info *info)
 	spa_pod_builder_init(&b, buffer, sizeof(buffer));
 	params[n_params++] = spa_format_audio_raw_build(&b,
 			SPA_PARAM_EnumFormat, &s->info);
+
+	struct spa_dict_item items[64];
+	uint32_t n_items = 0;
+
+	for (i = 0; i < impl->props->dict.n_items; i++) {
+		if (n_items < SPA_N_ELEMENTS(items) &&
+			spa_strstartswith(impl->props->dict.items[i].key, "media."))
+			items[n_items++] = impl->props->dict.items[i];
+	}
+	if (n_items > 0) {
+		struct spa_pod_frame f;
+		spa_tag_build_start(&b, &f, SPA_PARAM_Tag, direction);
+		spa_tag_build_add_dict(&b, &SPA_DICT_INIT(items, n_items));
+		params[n_params++] = spa_tag_build_end(&b, &f);
+	}
 
 	if ((res = pw_stream_connect(s->stream,
 			direction, PW_ID_ANY, flags, params, n_params)) < 0)
