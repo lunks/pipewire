@@ -625,31 +625,35 @@ static int do_add_stream(struct spa_loop *loop, bool async, uint32_t seq,
 	return 0;
 }
 
+static void check_props(struct impl *impl) {
+	uint32_t i;
+	for (i=0; i<impl->props->dict.n_items; i++) {
+		if (spa_strstartswith(impl->props->dict.items[i].key, "media."))
+			pw_log_debug("tag props %s", impl->props->dict.items[i].key);
+	}
+}
+
+static void check_combine_props(struct impl *impl) {
+	uint32_t i;
+	for (i=0; i<impl->combine_props->dict.n_items; i++) {
+		if (spa_strstartswith(impl->combine_props->dict.items[i].key, "media."))
+			pw_log_debug("tag combine_props %s", impl->combine_props->dict.items[i].key);
+	}
+}
+
+static void check_stream_props(struct impl *impl) {
+	uint32_t i;
+	for (i=0; i<impl->stream_props->dict.n_items; i++) {
+		if (spa_strstartswith(impl->stream_props->dict.items[i].key, "media."))
+			pw_log_debug("tag stream_props %s", impl->stream_props->dict.items[i].key);
+	}
+}
+
 static void update_tags(struct impl *impl)
 {
-	pw_log_info("updating tags");
-	struct stream *s;
-
-	spa_list_for_each(s, &impl->streams, link) {
-		if (s->stream == NULL)
-			continue;
-
-		struct spa_dict_item items[64];
-		uint32_t i, n_items = 0;
-
-		for (i=0; i<impl->props->dict.n_items; i++) {
-			if (spa_strstartswith(impl->props->dict.items[i].key, "media."))
-				pw_log_debug("tag props %s", impl->props->dict.items[i].key);
-		}
-		for (i=0; i<impl->combine_props->dict.n_items; i++) {
-			if (spa_strstartswith(impl->combine_props->dict.items[i].key, "media."))
-				pw_log_debug("tag combine_props %s", impl->combine_props->dict.items[i].key);
-		}
-		for (i=0; i<impl->stream_props->dict.n_items; i++) {
-			if (spa_strstartswith(impl->stream_props->dict.items[i].key, "media."))
-				pw_log_debug("tag stream_props %s", impl->stream_props->dict.items[i].key);
-		}
-	}
+	check_props(impl);
+	check_stream_props(impl);
+	check_combine_props(impl);
 }
 
 /* static void update_tags(struct impl *impl, const struct spa_pod *param) */
