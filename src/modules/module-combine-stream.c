@@ -16,17 +16,13 @@
 
 #include "config.h"
 
-#define spa_debug(fmt,...) printf(fmt"\n", ## __VA_ARGS__)
-
 #include <spa/utils/result.h>
 #include <spa/utils/string.h>
 #include <spa/utils/json.h>
 #include <spa/utils/ringbuffer.h>
 #include <spa/debug/types.h>
 #include <spa/debug/log.h>
-#include <spa/pod/pod.h>
 #include <spa/pod/builder.h>
-#include <spa/debug/pod.h>
 #include <spa/param/audio/format-utils.h>
 #include <spa/param/audio/raw.h>
 #include <spa/param/latency-utils.h>
@@ -34,7 +30,6 @@
 
 #include <pipewire/impl.h>
 #include <pipewire/i18n.h>
-
 
 /** \page page_module_combine_stream Combine Stream
  *
@@ -764,6 +759,7 @@ static void param_tag_changed(struct impl *impl, const struct spa_pod *param)
 	if (param == NULL)
 		return;
 
+	pw_log_debug("tag update");
 	struct stream *s;
 	struct spa_tag_info tag;
 	const struct spa_pod *params[1] = { param };
@@ -906,7 +902,7 @@ static int create_stream(struct stream_info *info)
 	struct impl *impl = info->impl;
 	int res;
 	uint32_t n_params, i, j;
-	const struct spa_pod *params[2];
+	const struct spa_pod *params[1];
 	const char *str, *node_name;
 	uint8_t buffer[1024];
 	struct spa_pod_builder b;
@@ -1016,21 +1012,6 @@ static int create_stream(struct stream_info *info)
 	spa_pod_builder_init(&b, buffer, sizeof(buffer));
 	params[n_params++] = spa_format_audio_raw_build(&b,
 			SPA_PARAM_EnumFormat, &s->info);
-
-	struct spa_dict_item items[64];
-	uint32_t n_items = 0;
-
-	for (i = 0; i < impl->stream_props->dict.n_items; i++) {
-		if (n_items < SPA_N_ELEMENTS(items) &&
-			spa_strstartswith(impl->stream_props->dict.items[i].key, "media."))
-			items[n_items++] = impl->stream_props->dict.items[i];
-	}
-	if (n_items > 0) {
-		struct spa_pod_frame f;
-		spa_tag_build_start(&b, &f, SPA_PARAM_Tag, direction);
-		spa_tag_build_add_dict(&b, &SPA_DICT_INIT(items, n_items));
-		params[n_params++] = spa_tag_build_end(&b, &f);
-	}
 
 	if ((res = pw_stream_connect(s->stream,
 			direction, PW_ID_ANY, flags, params, n_params)) < 0)
