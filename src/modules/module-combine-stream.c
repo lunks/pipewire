@@ -631,7 +631,7 @@ static void param_tag_changed(struct impl *impl, const struct spa_pod *param)
 	const struct spa_pod *params[1] = { param };
 	void *state = NULL;
 
-	if (param == 0 || spa_tag_parse(param, &tag, &state) < 0)
+	if (spa_tag_parse(param, &tag, &state) < 0)
 		return;
 	spa_list_for_each(s, &impl->streams, link) {
 		if (s->stream == NULL)
