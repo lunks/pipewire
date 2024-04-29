@@ -202,6 +202,12 @@ enum {
 	CODEC_AAC_ELD,
 };
 
+struct metadata {
+	char *track;
+	char *artist;
+	char *album;
+};
+
 struct impl {
 	struct pw_context *context;
 
@@ -267,6 +273,7 @@ struct impl {
 
 	bool mute;
 	float volume;
+	struct metadata *metadata;
 
 	struct spa_ringbuffer ring;
 	uint8_t buffer[BUFFER_SIZE];
@@ -853,6 +860,18 @@ static int rtsp_send_volume(struct impl *impl)
 	snprintf(header, sizeof(header), "volume: %s\r\n",
 			spa_dtoa(volstr, sizeof(volstr), impl->mute ? VOLUME_MUTE : impl->volume));
 	return rtsp_send(impl, "SET_PARAMETER", "text/parameters", header, rtsp_log_reply_status);
+}
+
+static int rtsp_send_track_info(struct impl *impl) {
+    if (!impl->recording)
+        return 0;  // Do not send if not recording
+
+    char header[1024];
+    snprintf(header, sizeof(header),
+             "dmap.itemname:%s\ndaap.songartist:%s\ndaap.songalbum:%s",
+             impl->metadata->track, impl->metadata->artist, impl->metadata->album);
+
+    return rtsp_send(impl, "SET_PARAMETER", "application/x-dmap-tagged", header, rtsp_log_reply_status);
 }
 
 static void rtsp_do_post_feedback(void *data, uint64_t expirations)

@@ -26,6 +26,7 @@
 #include <spa/param/audio/format-utils.h>
 #include <spa/param/audio/raw.h>
 #include <spa/param/latency-utils.h>
+#include <spa/param/tag-utils.h>
 
 #include <pipewire/impl.h>
 #include <pipewire/i18n.h>
@@ -617,6 +618,162 @@ static int do_add_stream(struct spa_loop *loop, bool async, uint32_t seq,
 		s->added = true;
 	}
 	return 0;
+}
+
+static void check_props(struct impl *impl) {
+	uint32_t i;
+	for (i=0; i<impl->props->dict.n_items; i++) {
+		if (spa_strstartswith(impl->props->dict.items[i].key, "media."))
+			pw_log_debug("tag props %s", impl->props->dict.items[i].key);
+	}
+}
+
+static void check_combine_props(struct impl *impl) {
+	uint32_t i;
+	for (i=0; i<impl->combine_props->dict.n_items; i++) {
+		if (spa_strstartswith(impl->combine_props->dict.items[i].key, "media."))
+			pw_log_debug("tag combine_props %s", impl->combine_props->dict.items[i].key);
+	}
+}
+
+static void check_stream_props(struct impl *impl) {
+	uint32_t i;
+	for (i=0; i<impl->stream_props->dict.n_items; i++) {
+		if (spa_strstartswith(impl->stream_props->dict.items[i].key, "media."))
+			pw_log_debug("tag stream_props %s", impl->stream_props->dict.items[i].key);
+	}
+}
+
+static void check_pod(const struct spa_pod *pod) {
+	if (pod == NULL) {
+		pw_log_debug("null");
+		return;
+	}
+
+	switch (SPA_POD_TYPE(pod)) {
+		case SPA_TYPE_Object:
+			{
+				pw_log_debug("Object");
+				const struct spa_pod_object *obj = (const struct spa_pod_object *)pod;
+				break;
+			}
+		case SPA_TYPE_Struct:
+			{
+				pw_log_debug("Struct");
+				const struct spa_pod_struct *str = (const struct spa_pod_struct *)pod;
+				break;
+			}
+		case SPA_TYPE_Array:
+			{
+				pw_log_debug("Array");
+				const struct spa_pod_array *arr = (const struct spa_pod_array *)pod;
+				break;
+			}
+		case SPA_TYPE_Bool:
+			{
+				pw_log_debug("Boolean");
+				pw_log_debug("Value: %d", SPA_POD_VALUE(struct spa_pod_bool, pod));
+				break;
+			}
+		case SPA_TYPE_Id:
+			{
+				pw_log_debug("ID");
+				pw_log_debug("Value: %d", SPA_POD_VALUE(struct spa_pod_id, pod));
+				break;
+			}
+		case SPA_TYPE_Int:
+			{
+				pw_log_debug("Integer");
+				pw_log_debug("Value: %d", SPA_POD_VALUE(struct spa_pod_int, pod));
+				break;
+			}
+		case SPA_TYPE_Long:
+			{
+				pw_log_debug("Long");
+				pw_log_debug("Value: %ld", SPA_POD_VALUE(struct spa_pod_long, pod));
+				break;
+			}
+		case SPA_TYPE_Float:
+			{
+				pw_log_debug("Float");
+				pw_log_debug("Value: %f", SPA_POD_VALUE(struct spa_pod_float, pod));
+				break;
+			}
+		case SPA_TYPE_Double:
+			{
+				pw_log_debug("Double");
+				pw_log_debug("Value: %f", SPA_POD_VALUE(struct spa_pod_double, pod));
+				break;
+			}
+		case SPA_TYPE_String:
+			{
+				pw_log_debug("String");
+				const char *s = (const char *)SPA_POD_CONTENTS(struct spa_pod_string, pod);
+				pw_log_debug("Value: %s", s);
+				break;
+			}
+		case SPA_TYPE_Bytes:
+			{
+				pw_log_debug("Bytes");
+				break;
+			}
+		case SPA_TYPE_Rectangle:
+			{
+				pw_log_debug("Rectangle");
+				break;
+			}
+		case SPA_TYPE_Fraction:
+			{
+				pw_log_debug("Fraction");
+				break;
+			}
+		default:
+			pw_log_debug("Unsupported SPA pod type");
+		break;
+	}
+}
+
+static void log_spa_pod_struct(const struct spa_pod_struct *pod) {
+	struct spa_pod *prop;
+	SPA_POD_STRUCT_FOREACH(pod, prop) {
+		check_pod(prop);
+	}
+}
+
+static void process_spa_pod_object(const struct spa_pod_object *obj) {
+	const struct spa_pod_prop *prop;
+
+	SPA_POD_OBJECT_FOREACH(obj, prop) {
+		pw_log_debug("key: %d", prop->key);
+		if (prop->key == 1) {
+			check_pod(&prop->value);
+		}
+		if (prop->key == 2) {
+			log_spa_pod_struct((const struct spa_pod_struct *)&prop->value);
+		}
+	}
+}
+
+static void param_tag_changed(struct impl *impl, const struct spa_pod *param)
+{
+	if (param == NULL)
+		return;
+
+	pw_log_debug("tag update");
+	struct stream *s;
+	struct spa_tag_info tag;
+	const struct spa_pod *params[1] = { param };
+	void *state = NULL;
+
+	if (param == 0 || spa_tag_parse(param, &tag, &state) < 0)
+		return;
+	spa_list_for_each(s, &impl->streams, link) {
+		if (s->stream == NULL)
+			continue;
+		pw_log_debug("updating stream %d", s->id);
+		pw_stream_update_params(s->stream, params, 1);
+
+	}
 }
 
 static int do_remove_stream(struct spa_loop *loop, bool async, uint32_t seq,
@@ -1246,6 +1403,10 @@ static void combine_param_changed(void *d, uint32_t id, const struct spa_pod *pa
 		pw_stream_update_params(impl->combine, &p, 1);
 
 		update_latency(impl);
+		break;
+	}
+	case SPA_PARAM_Tag: {
+		param_tag_changed(impl, param);
 		break;
 	}
 	default:
